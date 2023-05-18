@@ -1,0 +1,104 @@
+function download(filename, text) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+}
+
+let result = `<!DOCTYPE html>
+<html>
+<head>
+    <title>MCQs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0 auto;
+            max-width: 800px;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .mcq-statement {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 1em;
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .mcq-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .mcq-option:hover {
+            background-color: #f4f4f4;
+            padding-left: 10px;
+        }
+        .mcq-option-correct {
+            font-weight: bold;
+            color: green;
+        }
+        .mcq-option-incorrect {
+            color: red;
+        }
+        .mcq-answer {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-top: 0.5em;
+            color: green;
+        }
+        .mcq-explanation {
+            margin-top: 0.5em;
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>`;
+const mcqElements = document.querySelectorAll(".entry-content p");
+let mcqIndex = 0; // Add an index to keep track of MCQs
+let mcqNumber = 1; // Add a variable to keep track of MCQ numbering
+mcqElements.forEach(mcqElement => {
+    const mcqText = mcqElement.textContent.replace("View Answer", "");
+    if (mcqText.includes("\n") && /^\d+\./.test(mcqText)) { // Only scrape MCQs that have numbering
+        const mcqStatement = mcqText.split("\n")[0];
+        
+        // Remove the original numbering and add the correct numbering
+        result += `<p class="mcq-statement">${mcqNumber}. ${mcqStatement.replace(/^\d+\./, "")}</p>`;
+        
+        const options = mcqText.split("\n").slice(1);
+        const answerElement = mcqElement.nextElementSibling;
+        const answerText = answerElement.textContent.replace("Answer:", "").replace("Explanation:", "");
+        const answerLetter = answerText.trim().split("\n")[0].trim();
+        
+        // Add buttons to click options of each MCQ
+        options.forEach(option => {
+            if (option.startsWith(answerLetter)) {
+                result += `<button class="mcq-option" onclick="this.style.color='green'">${option}</button>`;
+            } else {
+                result += `<button class="mcq-option" onclick="this.style.color='red'">${option}</button>`;
+            }
+        });
+        
+        // Add a button to view the answer and explanation
+        result += `<button onclick="var answerElement = document.getElementById('answer-${mcqIndex}'); var explanationElement = document.getElementById('explanation-${mcqIndex}'); if (answerElement.style.display === 'none') { answerElement.style.display='block'; explanationElement.style.display='block'; } else { answerElement.style.display='none'; explanationElement.style.display='none'; }">View Answer and Explanation</button>`;
+        
+        result += `<p class="mcq-answer" id="answer-${mcqIndex}" style="display:none">Answer:${answerLetter}</p>`;
+        
+        const explanation = answerText.split("\n").slice(1).join("<br>");
+        
+        // Hide the explanation initially
+        result += `<p class="mcq-explanation" id="explanation-${mcqIndex}" style="display:none">${explanation}</p>`;
+        
+        mcqIndex++; // Increment the index for the next MCQ
+        mcqNumber++; // Increment the MCQ numbering for the next MCQ
+    }
+});
+
+// Add a reset button on top right side of page
+result += `<button style="position:absolute;top:20px;right:20px" onclick="location.reload()">Reset</button>`;
+
+result += "</body></html>";
+download("mcqs.html", result);
