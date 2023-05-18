@@ -1,3 +1,10 @@
+▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+█▄▄░▄▄██░██░██░▄▄▄██░▄▀▄░██░▄▄▀██░▄▄▄░█░▄▄▀██░▄▀▄░█▄░▄
+███░████░▄▄░██░▄▄▄██░█░█░██░▀▀▄██▄▄▄▀▀█░▀▀░██░█░█░██░█
+███░████░██░██░▀▀▀██░███░██░██░██░▀▀▀░█░██░██░███░█▀░▀
+▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+
 # Sanfoundry MCQ Scraper
 This scraper extracts MCQs (Multiple Choice Questions) from a Sanfoundry webpage and saves them to an HTML file. The HTML file contains the MCQs, options, and answers in a quiz format. The user can click on the options to see if they are correct or incorrect. The code also adds a button after each MCQ that allows the user to view the answer and explanation when clicked. The answer and explanation are initially hidden and are only displayed when the button is clicked. Clicking the button again will hide the answer and explanation.
 
