@@ -1,104 +1,187 @@
-function download(filename, text) {
-    var element = document.createElement('a');
-    element.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(text));
-    element.setAttribute('download', filename);
-    element.style.display = 'none';
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+// Remove elements that destroy the structure
+let elementsToRemove = [
+    ...document.querySelectorAll('div[style="margin:30px 0px;"]'),
+    ...document.querySelectorAll('div.sf-mobile-ads'),
+    ...document.querySelectorAll('div.sf-desktop-ads'),
+    ...document.querySelectorAll('span.collapseomatic')
+];
+
+for (let element of elementsToRemove) {
+    if (element.parentNode) {
+        element.parentNode.removeChild(element);
+    }
 }
 
-let result = `<!DOCTYPE html>
-<html>
+let pTags = document.getElementsByTagName('p');
+let results = [];
+
+for (let i = 0; i < pTags.length; i++) {
+    let imgHref = null;
+    let aTag = pTags[i].getElementsByTagName('a')[0];
+    if (aTag) {
+        let imgTag = aTag.getElementsByTagName('img')[0];
+        if (imgTag) {
+            imgHref = imgTag.src || imgTag.getAttribute('data-src');
+            aTag.parentNode.removeChild(aTag);
+        }
+    }
+
+    let startsWithNumber = /^\d/.test(pTags[i].textContent);
+    let nextSibling = pTags[i].nextElementSibling;
+    if (startsWithNumber && nextSibling && nextSibling.tagName.toLowerCase() === 'div' && nextSibling.classList.contains('collapseomatic_content')) {
+        let statementAndOptions = pTags[i].innerHTML.split('<br>');
+        let statement = statementAndOptions.shift();
+        let options = statementAndOptions.join('<br>').replace(/\n/g, '');
+        let answerAndExplanation = nextSibling.innerHTML.split('<br>');
+        let answer = answerAndExplanation.shift().replace(/\n/g, '');
+        let explanation = answerAndExplanation.join('<br>').replace(/\n/g, '');
+        results.push({
+            statement: statement,
+            imgHref: imgHref,
+            options: options,
+            answer: answer,
+            explanation: explanation
+        });
+    }
+
+    let nextDiv = pTags[i].nextElementSibling;
+    if (nextDiv && nextDiv.tagName.toLowerCase() === 'div' && nextDiv.classList.contains('hk1_style-wrap5')) {
+        let pre = nextDiv.getElementsByTagName('pre')[0];
+        if (pre) {
+            let nextP = nextDiv.nextElementSibling;
+            if (nextP && nextP.tagName.toLowerCase() === 'p') {
+                let nextDiv2 = nextP.nextElementSibling;
+                if (nextDiv2 && nextDiv2.tagName.toLowerCase() === 'div' && nextDiv2.classList.contains('collapseomatic_content')) {
+                    let statement = pTags[i].textContent;
+                    let preContent = pre.textContent.replace(/\n/g, '');
+                    let options = nextP.innerHTML.split('<br>').join('<br>').replace(/\n/g, '');
+                    let answerAndExplanation = nextDiv2.innerHTML.split('<br>');
+                    let answer = answerAndExplanation.shift().replace(/\n/g, '');
+                    let explanation = answerAndExplanation.join('<br>').replace(/\n/g, '');
+                    results.push({
+                        statement: statement,
+                        preContent: preContent,
+                        options: options,
+                        answer: answer,
+                        explanation: explanation
+                    });
+                }
+            }
+        }
+
+        let del1 = nextDiv.getElementsByClassName('del1')[0];
+        if (del1) {
+            let statement = pTags[i].textContent + ' ' + del1.textContent;
+            let nextP = nextDiv.nextElementSibling;
+            if (nextP && nextP.tagName.toLowerCase() === 'p') {
+                let nextDiv2 = nextP.nextElementSibling;
+                if (nextDiv2 && nextDiv2.tagName.toLowerCase() === 'div' && nextDiv2.classList.contains('collapseomatic_content')) {
+                    let options = nextP.innerHTML.split('<br>').join('<br>').replace(/\n/g, '');
+                    let answerAndExplanation = nextDiv2.innerHTML.split('<br>');
+                    let answer = answerAndExplanation.shift().replace(/\n/g, '');
+                    let explanation = answerAndExplanation.join('<br>').replace(/\n/g, '');
+                    results.push({
+                        statement: statement,
+                        options: options,
+                        answer: answer,
+                        explanation: explanation
+                    });
+                }
+            }
+        }
+    }
+}
+
+console.log(JSON.stringify(results, null, 2));
+
+
+// ... Your existing code to extract the MCQs ...
+
+// Now let's generate the HTML
+let html = `
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>MCQs</title>
+    <meta charset="UTF-8">
+    <meta name="viewport"="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0 auto;
-            max-width: 800px;
-            padding: 20px;
-            background-color: #f0f0f0;
+        @tailwind base;
+        @tailwind components;
+        @tailwind utilities;
+
+        .option:hover:not(.selected) {
+          @apply bg-gray-300;
         }
-        .mcq-statement {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-top: 1em;
-            background-color: #f4f4f4;
-            padding: 10px;
-            border-radius: 5px;
+        .correct {
+          @apply bg-green-200;
         }
-        .mcq-option {
-            transition: all 0.2s ease-in-out;
+        .incorrect {
+          @apply bg-red-200;
         }
-        .mcq-option:hover {
-            background-color: #f4f4f4;
-            padding-left: 10px;
+        .selected {
+          @apply bg-gray-400;
         }
-        .mcq-option-correct {
-            font-weight: bold;
-            color: green;
+        .option:hover {
+          @apply scale-105;
         }
-        .mcq-option-incorrect {
-            color: red;
+        .selected {
+          @apply scale-110;
         }
-        .mcq-answer {
-            font-size: 1.1em;
-            font-weight: bold;
-            margin-top: 0.5em;
-            color: green;
-        }
-        .mcq-explanation {
-            margin-top: 0.5em;
-            background-color: #f4f4f4;
-            padding: 10px;
-            border-radius: 5px;
+        .option:focus {
+          @apply ring-4 ring-blue-500 ring-offset-2 ring-offset-gray-100;
         }
     </style>
 </head>
-<body>`;
-const mcqElements = document.querySelectorAll(".entry-content p");
-let mcqIndex = 0; // Add an index to keep track of MCQs
-let mcqNumber = 1; // Add a variable to keep track of MCQ numbering
-mcqElements.forEach(mcqElement => {
-    const mcqText = mcqElement.textContent.replace("View Answer", "");
-    if (mcqText.includes("\n") && /^\d+\./.test(mcqText)) { // Only scrape MCQs that have numbering
-        const mcqStatement = mcqText.split("\n")[0];
-        
-        // Remove the original numbering and add the correct numbering
-        result += `<p class="mcq-statement">${mcqNumber}. ${mcqStatement.replace(/^\d+\./, "")}</p>`;
-        
-        const options = mcqText.split("\n").slice(1);
-        const answerElement = mcqElement.nextElementSibling;
-        const answerText = answerElement.textContent.replace("Answer:", "").replace("Explanation:", "");
-        const answerLetter = answerText.trim().split("\n")[0].trim();
-        
-        // Add buttons to click options of each MCQ
-        options.forEach(option => {
-            if (option.startsWith(answerLetter)) {
-                result += `<button class="mcq-option" onclick="this.style.color='green'">${option}</button>`;
-            } else {
-                result += `<button class="mcq-option" onclick="this.style.color='red'">${option}</button>`;
-            }
-        });
-        
-        // Add a button to view the answer and explanation
-        result += `<button onclick="var answerElement = document.getElementById('answer-${mcqIndex}'); var explanationElement = document.getElementById('explanation-${mcqIndex}'); if (answerElement.style.display === 'none') { answerElement.style.display='block'; explanationElement.style.display='block'; } else { answerElement.style.display='none'; explanationElement.style.display='none'; }">View Answer and Explanation</button>`;
-        
-        result += `<p class="mcq-answer" id="answer-${mcqIndex}" style="display:none">Answer:${answerLetter}</p>`;
-        
-        const explanation = answerText.split("\n").slice(1).join("<br>");
-        
-        // Hide the explanation initially
-        result += `<p class="mcq-explanation" id="explanation-${mcqIndex}" style="display:none">${explanation}</p>`;
-        
-        mcqIndex++; // Increment the index for the next MCQ
-        mcqNumber++; // Increment the MCQ numbering for the next MCQ
-    }
-});
+<body class="bg-gray-100 p-10">
 
-// Add a reset button on top right side of page
-result += `<button style="position:absolute;top:20px;right:20px" onclick="location.reload()">Reset</button>`;
+    <div class="flex justify-between items-center mb-4 sticky top-0 bg-white z-50">
+        <div>
+            <p class="text-lg font-bold">Time: <span id="timer" class="text-blue-500">00:00</span></p>
+        </div>
+        <div>
+            <p class="text-lg font-bold text-green-500">Correct: <span id="correct-count">0</span></p>
+            <p class="text-lg font-bold text-red-500">Incorrect: <span id="incorrect-count">0</span></p>
+        </div>
+    </div>
 
-result += "</body></html>";
-download("mcqs.html", result);
+
+
+    ${results.map((result, index) => `
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col my-2">
+        <div class="md:flex mb-6">
+            <div class="md:w-1/2 px-3">
+                <label class="block uppercase tracking-wide text-blue-900 text-lg font-bold mb-2" for="grid-first-name">
+                    Q${index + 1}: ${result.statement.replace(/^\d+\.\s*/, '')}
+                </label>
+                ${result.preContent ? `<pre>${result.preContent}</pre>` : ''}
+            </div>
+            <div class="md:w-1/2 px-3">
+                ${result.imgHref ? `<img src="${result.imgHref}" alt="Image" class="mb-4">` : ''}
+            </div>
+        </div>
+        <div class="md:flex mb-6">
+            <div class="md:w-full px-3">
+                <div id="options-${index}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    ${result.options.split('<br>').map((option, optionIndex) => option.trim() !== "" ? `
+                    <p class="option cursor-pointer py-2 px-4 rounded bg-blue-100 hover:bg-blue-200" onclick="checkAnswer(${index}, ${optionIndex})">${option}</p>
+                    ` : '').join('')}
+                </div>
+                <button class="mt-3 text-white bg-blue-700 border-0 py-2 px-6 focus:outline-none hover:bg-blue-800 rounded text-lg" onclick="document.getElementById('answer-${index}').classList.toggle('hidden');document.getElementById('explanation-${index}').classList.toggle('hidden');">Show/Hide Answer</button>
+                <p id="answer-${index}" class="hidden mt-3 text-grey-darker text-base bg-gray-200 p-4 rounded">${result.answer}</p>
+                <p id="explanation-${index}" class="hidden mt-3 text-grey-darker text-base bg-gray-200 p-4 rounded">${result.explanation}</p>
+            </div>
+        </div>
+    </div>
+    `).join('')}
+    <script src="script.js"></script>
+</body>
+</html>`;
+
+// Download the file
+let blob = new Blob([html], {type: "text/html;charset=utf-8"});
+let link = document.createElement("a");
+link.href = URL.createObjectURL(blob);
+link.download = "quiz.html";
+link.click();
