@@ -175,7 +175,51 @@ let html = `
         </div>
     </div>
     `).join('')}
-    <script src="script.js"></script>
+    <script>
+        // Initialize score counters
+        let correctCount = 0;
+        let incorrectCount = 0;
+        
+        // Initialize timer
+        let timer = 0;
+        let timerElement = document.getElementById('timer');
+        
+        // Start timer
+        setInterval(function() {
+            timer++;
+            let minutes = Math.floor(timer / 60);
+            let seconds = timer % 60;
+            timerElement.textContent = (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+        }, 1000);
+        
+        window.checkAnswer = function(questionIndex, optionIndex) {
+            let options = document.getElementById('options-' + questionIndex).children;
+            let answerElement = document.getElementById('answer-' + questionIndex);
+            let answer = answerElement.textContent.split(': ')[1].trim().toLowerCase();
+            for (let i = 0; i < options.length; i++) {
+                // Disable all options
+                options[i].classList.add('cursor-not-allowed', 'opacity-50');
+                options[i].setAttribute('onclick', '');
+        
+                if (i === optionIndex) {
+                    options[i].classList.add('selected');
+                    if (answer.includes(options[i].textContent.trim()[0].toLowerCase())) {
+                        options[i].classList.remove('bg-blue-100', 'hover:bg-blue-200');
+                        options[i].classList.add('bg-green-500');
+                        correctCount++;
+                    } else {
+                        options[i].classList.remove('bg-blue-100', 'hover:bg-blue-200');
+                        options[i].classList.add('bg-red-500');
+                        incorrectCount++;
+                    }
+                }
+            }
+        
+            // Update score counters
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('incorrect-count').textContent = incorrectCount;
+        };
+    </script>
 </body>
 </html>`;
 
