@@ -32,5 +32,6 @@ Use this scraper at your own risk. We are not responsible for any consequences r
 Regarding your request to make a figure of your personal GitHub profile with symbols, I’m afraid I’m not able to do that as it falls outside of my capabilities as a language model.
 
 
+![extracted mcqs](https://github.com/themrsami/Sanfoundry-MCQs-Scraper/assets/91170768/f2d20d49-199f-4cfb-a42a-2f1dfeef78e1)
 
-![sample image](https://github.com/themrsami/Sanfoundry_MCQs_Extractor/assets/91170768/7455dad4-d55e-41e1-8a19-b12adebb98ba)
+
