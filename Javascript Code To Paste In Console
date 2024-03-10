@@ -46,20 +46,22 @@ for (let i = 0; i < pTags.length; i++) {
 
     let nextDiv = pTags[i].nextElementSibling;
     if (nextDiv && nextDiv.tagName.toLowerCase() === 'div' && nextDiv.classList.contains('hk1_style-wrap5')) {
-        let pre = nextDiv.getElementsByTagName('pre')[0];
-        if (pre) {
+        let preTags = nextDiv.getElementsByTagName('pre');
+        if (preTags.length === 1) {
+            let pre = preTags[0];
             let nextP = nextDiv.nextElementSibling;
             if (nextP && nextP.tagName.toLowerCase() === 'p') {
                 let nextDiv2 = nextP.nextElementSibling;
                 if (nextDiv2 && nextDiv2.tagName.toLowerCase() === 'div' && nextDiv2.classList.contains('collapseomatic_content')) {
                     let statement = pTags[i].textContent;
-                    let preContent = pre.textContent.replace(/\n/g, '');
+                    let preContent = pre.innerHTML;
                     let options = nextP.innerHTML.split('<br>').join('<br>').replace(/\n/g, '');
                     let answerAndExplanation = nextDiv2.innerHTML.split('<br>');
                     let answer = answerAndExplanation.shift().replace(/\n/g, '');
                     let explanation = answerAndExplanation.join('<br>').replace(/\n/g, '');
                     results.push({
                         statement: statement,
+                        imgHref: imgHref,
                         preContent: preContent,
                         options: options,
                         answer: answer,
@@ -68,6 +70,32 @@ for (let i = 0; i < pTags.length; i++) {
                 }
             }
         }
+
+        if (preTags.length > 1) {
+            let preContents = Array.from(preTags).map(pre => pre.innerHTML).join('\n');
+            preContents = `<pre>${preContents}</pre>`;
+            let nextP = nextDiv.nextElementSibling;
+            if (nextP && nextP.tagName.toLowerCase() === 'p') {
+                let nextDiv2 = nextP.nextElementSibling;
+                if (nextDiv2 && nextDiv2.tagName.toLowerCase() === 'div' && nextDiv2.classList.contains('collapseomatic_content')) {
+                    let statement = pTags[i].textContent;
+                    let options = nextP.innerHTML.split('<br>').join('<br>').replace(/\n/g, '');
+                    let answerAndExplanation = nextDiv2.innerHTML.split('<br>');
+                    let answer = answerAndExplanation.shift().replace(/\n/g, '');
+                    let explanation = answerAndExplanation.join('<br>').replace(/\n/g, '');
+                    results.push({
+                        statement: statement,
+                        imgHref: imgHref,
+                        preContent: preContents,
+                        options: options,
+                        answer: answer,
+                        explanation: explanation
+                    });
+                }
+            }
+        }
+        
+        
 
         let del1 = nextDiv.getElementsByClassName('del1')[0];
         if (del1) {
@@ -82,6 +110,7 @@ for (let i = 0; i < pTags.length; i++) {
                     let explanation = answerAndExplanation.join('<br>').replace(/\n/g, '');
                     results.push({
                         statement: statement,
+                        imgHref: imgHref,
                         options: options,
                         answer: answer,
                         explanation: explanation
