@@ -29,7 +29,6 @@ We do not claim ownership of any content extracted by this scraper. All content 
 
 Use this scraper at your own risk. We are not responsible for any consequences resulting from its use.
 
-Regarding your request to make a figure of your personal GitHub profile with symbols, I’m afraid I’m not able to do that as it falls outside of my capabilities as a language model.
 
 
 ![extracted mcqs](https://github.com/themrsami/Sanfoundry-MCQs-Scraper/assets/91170768/f2d20d49-199f-4cfb-a42a-2f1dfeef78e1)
